@@ -1,0 +1,9 @@
+*.zip
+opencv-sdk.zip
+OpenCV-android-sdk/
+build/
+app/build/
+.gradle/
+*.apk
+*.so
+*.aar
