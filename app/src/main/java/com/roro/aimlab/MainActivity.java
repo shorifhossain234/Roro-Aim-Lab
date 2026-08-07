@@ -8,18 +8,12 @@ import android.provider.Settings;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 
 public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        MobileAds.initialize(this, initializationStatus -> {});
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -46,12 +40,6 @@ public class MainActivity extends Activity {
             startService(serviceIntent);
         });
         layout.addView(startBtn);
-
-        AdView adView = new AdView(this);
-        adView.setAdSize(AdSize.BANNER);
-        adView.setAdUnitId("ca-app-pub-3071340264379141/1648765767");
-        layout.addView(adView);
-        adView.loadAd(new AdRequest.Builder().build());
 
         setContentView(layout);
     }
