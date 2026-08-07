@@ -7,13 +7,46 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        File crashFile = new File(getFilesDir(), "last_crash.txt");
+        if (crashFile.exists()) {
+            try {
+                StringBuilder sb = new StringBuilder();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(crashFile)));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+                reader.close();
+
+                TextView errorView = new TextView(this);
+                errorView.setText("CRASH LOG:\n\n" + sb.toString());
+                errorView.setTextSize(12);
+                errorView.setPadding(30, 60, 30, 30);
+                errorView.setTextIsSelectable(true);
+
+                ScrollView scrollView = new ScrollView(this);
+                scrollView.addView(errorView);
+                setContentView(scrollView);
+
+                crashFile.delete();
+                return;
+            } catch (Exception e) {
+                // fall through to normal UI
+            }
+        }
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);

@@ -8,6 +8,7 @@
 
     <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3071340264379141~6007527183"/>
     <application
+        android:name=".CrashApp"
         android:allowBackup="true"
 
         android:label="Roro Aim Lab"
