@@ -42,7 +42,7 @@ public class FloatingButtonService extends Service {
 
         windowManager.addView(floatingButton, params);
 
-        floatingButton.setOnTouchListener(new FloatingTouchListener(params, windowManager, floatingButton));
+        floatingButton.setOnTouchListener(new FloatingTouchListener(params, windowManager, floatingButton, this));
     }
 
     @Nullable
