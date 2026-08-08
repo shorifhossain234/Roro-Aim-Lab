@@ -8,7 +8,6 @@ import android.os.IBinder;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.Button;
-import androidx.annotation.Nullable;
 
 public class FloatingButtonService extends Service {
 
@@ -45,7 +44,6 @@ public class FloatingButtonService extends Service {
         floatingButton.setOnTouchListener(new FloatingTouchListener(params, windowManager, floatingButton, this));
     }
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
