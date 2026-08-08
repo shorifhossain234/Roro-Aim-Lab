@@ -1,2 +1,4 @@
 include ':app'
+include ':opencv'
 rootProject.name = "RoroAimLab"
+project(':opencv').projectDir = new File('OpenCV-android-sdk/sdk')
