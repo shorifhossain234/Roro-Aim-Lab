@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.ConnectionResult;
 
 public class MainActivity extends Activity {
     @Override
@@ -12,26 +14,23 @@ public class MainActivity extends Activity {
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(30, 60, 30, 30);
 
         TextView tv = new TextView(this);
-        tv.setText("Hello Roro + AdMob (safe)");
-        tv.setTextSize(24);
-        layout.addView(tv);
+        tv.setTextSize(16);
 
         try {
-            com.google.android.gms.ads.MobileAds.initialize(this, initializationStatus -> {});
-            com.google.android.gms.ads.AdView adView = new com.google.android.gms.ads.AdView(this);
-            adView.setAdSize(com.google.android.gms.ads.AdSize.BANNER);
-            adView.setAdUnitId("ca-app-pub-3071340264379141/1648765767");
-            layout.addView(adView);
-            adView.loadAd(new com.google.android.gms.ads.AdRequest.Builder().build());
+            int result = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+            if (result == ConnectionResult.SUCCESS) {
+                tv.setText("Google Play Services: AVAILABLE ✅\n\nAdMob should work fine.");
+            } else {
+                tv.setText("Google Play Services: NOT AVAILABLE ❌\n\nError code: " + result + "\n\nThis is why AdMob crashes.");
+            }
         } catch (Throwable t) {
-            TextView errorTv = new TextView(this);
-            errorTv.setText("Ad failed: " + t.getMessage());
-            errorTv.setTextSize(12);
-            layout.addView(errorTv);
+            tv.setText("Error checking Play Services:\n\n" + t.toString());
         }
 
+        layout.addView(tv);
         setContentView(layout);
     }
 }
