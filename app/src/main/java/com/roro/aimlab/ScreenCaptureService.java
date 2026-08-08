@@ -15,12 +15,14 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.util.DisplayMetrics;
 
 public class ScreenCaptureService extends Service {
     private MediaProjection mediaProjection;
     private VirtualDisplay virtualDisplay;
     private ImageReader imageReader;
+    private PowerManager.WakeLock wakeLock;
     private int screenWidth, screenHeight, screenDensity;
 
     @Override
@@ -30,6 +32,10 @@ public class ScreenCaptureService extends Service {
         screenWidth = metrics.widthPixels;
         screenHeight = metrics.heightPixels;
         screenDensity = metrics.densityDpi;
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RoroAimLab:CaptureLock");
+        wakeLock.acquire();
     }
 
     @Override
@@ -64,7 +70,7 @@ public class ScreenCaptureService extends Service {
     }
 
     private void processFrame(android.media.Image image) {
-        // পরের ধাপে এখানে OpenCV Mat বানাবো
+        // পরের ধাপে OpenCV দিয়ে গুটি খুঁজব
     }
 
     private Notification buildNotification() {
@@ -76,8 +82,9 @@ public class ScreenCaptureService extends Service {
 
         return new Notification.Builder(this, channelId)
                 .setContentTitle("Roro Aim Lab")
-                .setContentText("Capturing screen for aim assist")
+                .setContentText("Aim assist active")
                 .setSmallIcon(android.R.drawable.ic_menu_compass)
+                .setOngoing(true)
                 .build();
     }
 
@@ -89,5 +96,6 @@ public class ScreenCaptureService extends Service {
         super.onDestroy();
         if (virtualDisplay != null) virtualDisplay.release();
         if (mediaProjection != null) mediaProjection.stop();
+        if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
     }
 }
