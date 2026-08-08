@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
-import androidx.core.content.ContextCompat;
+import android.widget.Toast;
 
 public class CaptureRequestActivity extends Activity {
     private static final int REQUEST_CODE = 1001;
@@ -21,10 +21,18 @@ public class CaptureRequestActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            Toast.makeText(this, "Permission granted! Starting service...", Toast.LENGTH_SHORT).show();
             Intent serviceIntent = new Intent(this, ScreenCaptureService.class);
             serviceIntent.putExtra("resultCode", resultCode);
             serviceIntent.putExtra("data", data);
-            ContextCompat.startForegroundService(this, serviceIntent);
+            try {
+                startForegroundService(serviceIntent);
+                Toast.makeText(this, "Service started!", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(this, "Service error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "Permission denied or cancelled. ResultCode: " + resultCode, Toast.LENGTH_LONG).show();
         }
         finish();
     }
