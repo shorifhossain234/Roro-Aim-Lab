@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class FloatingTouchListener implements View.OnTouchListener {
 
@@ -17,8 +18,8 @@ public class FloatingTouchListener implements View.OnTouchListener {
     private float initialTouchX, initialTouchY;
     private long touchStartTime;
 
-    private static final int CLICK_DRAG_TOLERANCE = 10;
-    private static final long CLICK_MAX_DURATION = 200;
+    private static final int CLICK_DRAG_TOLERANCE = 20;
+    private static final long CLICK_MAX_DURATION = 300;
 
     public FloatingTouchListener(WindowManager.LayoutParams params, WindowManager windowManager, View view, Context context) {
         this.params = params;
@@ -50,6 +51,7 @@ public class FloatingTouchListener implements View.OnTouchListener {
                 long duration = System.currentTimeMillis() - touchStartTime;
 
                 if (dx < CLICK_DRAG_TOLERANCE && dy < CLICK_DRAG_TOLERANCE && duration < CLICK_MAX_DURATION) {
+                    Toast.makeText(context, "Tap detected! Opening capture...", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(context, CaptureRequestActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
