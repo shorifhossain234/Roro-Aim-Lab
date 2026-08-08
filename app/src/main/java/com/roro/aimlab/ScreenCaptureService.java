@@ -12,13 +12,16 @@ import android.hardware.display.VirtualDisplay;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 public class ScreenCaptureService extends Service {
+    private static final String TAG = "ScreenCaptureService";
     private MediaProjection mediaProjection;
     private VirtualDisplay virtualDisplay;
     private ImageReader imageReader;
@@ -35,36 +38,61 @@ public class ScreenCaptureService extends Service {
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RoroAimLab:CaptureLock");
-        wakeLock.acquire();
+        wakeLock.acquire(10*60*1000L);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(1, buildNotification());
+        try {
+            startForeground(1, buildNotification());
 
-        int resultCode = intent.getIntExtra("resultCode", -1);
-        Intent data = intent.getParcelableExtra("data");
-
-        MediaProjectionManager mgr = (MediaProjectionManager)
-                getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        mediaProjection = mgr.getMediaProjection(resultCode, data);
-
-        imageReader = ImageReader.newInstance(
-                screenWidth, screenHeight, PixelFormat.RGBA_8888, 2);
-
-        virtualDisplay = mediaProjection.createVirtualDisplay(
-                "RoroAimLabCapture",
-                screenWidth, screenHeight, screenDensity,
-                DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                imageReader.getSurface(), null, null);
-
-        imageReader.setOnImageAvailableListener(reader -> {
-            android.media.Image image = reader.acquireLatestImage();
-            if (image != null) {
-                processFrame(image);
-                image.close();
+            int resultCode = intent.getIntExtra("resultCode", -1);
+            Intent data;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                data = intent.getParcelableExtra("data", Intent.class);
+            } else {
+                data = intent.getParcelableExtra("data");
             }
-        }, new Handler(Looper.getMainLooper()));
+
+            if (resultCode == -1 || data == null) {
+                Log.e(TAG, "Invalid resultCode or data");
+                stopSelf();
+                return START_NOT_STICKY;
+            }
+
+            MediaProjectionManager mgr = (MediaProjectionManager)
+                    getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            mediaProjection = mgr.getMediaProjection(resultCode, data);
+
+            if (mediaProjection == null) {
+                Log.e(TAG, "MediaProjection is null");
+                stopSelf();
+                return START_NOT_STICKY;
+            }
+
+            imageReader = ImageReader.newInstance(
+                    screenWidth, screenHeight, PixelFormat.RGBA_8888, 2);
+
+            virtualDisplay = mediaProjection.createVirtualDisplay(
+                    "RoroAimLabCapture",
+                    screenWidth, screenHeight, screenDensity,
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                    imageReader.getSurface(), null, null);
+
+            imageReader.setOnImageAvailableListener(reader -> {
+                android.media.Image image = reader.acquireLatestImage();
+                if (image != null) {
+                    processFrame(image);
+                    image.close();
+                }
+            }, new Handler(Looper.getMainLooper()));
+
+            Log.d(TAG, "Screen capture started successfully");
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting capture: " + e.getMessage());
+            stopSelf();
+        }
 
         return START_STICKY;
     }
@@ -82,7 +110,7 @@ public class ScreenCaptureService extends Service {
 
         return new Notification.Builder(this, channelId)
                 .setContentTitle("Roro Aim Lab")
-                .setContentText("Aim assist active")
+                .setContentText("Aim assist active ✅")
                 .setSmallIcon(android.R.drawable.ic_menu_compass)
                 .setOngoing(true)
                 .build();
