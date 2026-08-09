@@ -27,6 +27,7 @@ public class CaptureRequestActivity extends Activity {
             serviceIntent.putExtra("data", data);
             try {
                 startForegroundService(serviceIntent);
+            AimOverlayService.start(this);
                 Toast.makeText(this, "Service started!", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 Toast.makeText(this, "Service error: " + e.getMessage(), Toast.LENGTH_LONG).show();
