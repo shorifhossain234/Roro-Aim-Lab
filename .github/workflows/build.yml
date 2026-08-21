@@ -15,10 +15,11 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-      - name: Accept SDK licenses
-        run: yes | sdkmanager --licenses || true
+      - name: Download OpenCV Android SDK
+        run: |
+          curl -L -o opencv.zip https://github.com/opencv/opencv/releases/download/4.9.0/opencv-4.9.0-android-sdk.zip
+          unzip -q opencv.zip -d .
+          ls -la
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build debug APK
